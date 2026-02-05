@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>几点了 - 汉语时间游戏</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #FFD166;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .header {
+            color: #EF476F;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .clock-container {
+            background-color: #06D6A0;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+        
+        .clock {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            position: relative;
+            background-color: white;
+            border: 15px solid #118AB2;
+        }
+        
+        .number {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 2;
+        }
+        
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            background-color: black;
+            border-radius: 5px;
+            z-index: 5;
+        }
+        
+        .hour-hand {
+            width: 8px;
+            height: 80px;
+            margin-left: -4px;
+        }
+        
+        .minute-hand {
+            width: 4px;
+            height: 120px;
+            margin-left: -2px;
+        }
+        
+        .center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background-color: black;
+            border-radius: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            z-index: 10;
+        }
+        
+        .instructions {
+            background-color: #EF476F;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 500px;
+            text-align: center;
+            font-size: 1.2em;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .click-text {
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: #118AB2;
+            font-weight: bold;
+        }
+        
+        .time-type-selector {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .time-type-btn {
+            padding: 8px 15px;
+            background-color: #118AB2;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .time-type-btn.active {
+            background-color: #EF476F;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>几点了？</h1>
+    </div>
+    
+    <div class="time-type-selector">
+        <button class="time-type-btn active" data-type="all">全部类型</button>
+        <button class="time-type-btn" data-type="hour">整点</button>
+        <button class="time-type-btn" data-type="half">半点</button>
+        <button class="time-type-btn" data-type="quarter">一刻/三刻</button>
+        <button class="time-type-btn" data-type="five">五分钟倍数</button>
+    </div>
+    
+    <div class="clock-container">
+        <div class="clock" id="clock">
+            <div class="center-circle"></div>
+            
+            <!-- 只保留1-12小时数字 -->
+            <div class="number" style="transform: rotate(30deg)"><span style="transform: rotate(-30deg)">1</span></div>
+            <div class="number" style="transform: rotate(60deg)"><span style="transform: rotate(-60deg)">2</span></div>
+            <div class="number" style="transform: rotate(90deg)"><span style="transform: rotate(-90deg)">3</span></div>
+            <div class="number" style="transform: rotate(120deg)"><span style="transform: rotate(-120deg)">4</span></div>
+            <div class="number" style="transform: rotate(150deg)"><span style="transform: rotate(-150deg)">5</span></div>
+            <div class="number" style="transform: rotate(180deg)"><span style="transform: rotate(-180deg)">6</span></div>
+            <div class="number" style="transform: rotate(210deg)"><span style="transform: rotate(-210deg)">7</span></div>
+            <div class="number" style="transform: rotate(240deg)"><span style="transform: rotate(-240deg)">8</span></div>
+            <div class="number" style="transform: rotate(270deg)"><span style="transform: rotate(-270deg)">9</span></div>
+            <div class="number" style="transform: rotate(300deg)"><span style="transform: rotate(-300deg)">10</span></div>
+            <div class="number" style="transform: rotate(330deg)"><span style="transform: rotate(-330deg)">11</span></div>
+            <div class="number" style="transform: rotate(0deg)"><span style="transform: rotate(0deg)">12</span></div>
+            
+            <!-- 时针和分针 -->
+            <div class="hand hour-hand" id="hour-hand"></div>
+            <div class="hand minute-hand" id="minute-hand"></div>
+        </div>
+    </div>
+    
+    <div class="click-text">点击钟面生成新时间</div>
+    
+    <div class="instructions">
+        <p>这是一个练习说时间的游戏。点击钟面会随机生成一个时间，请用汉语说出这个时间。</p>
+        <p>可以练习：整点(三点)、半点(三点半)、一刻(三点一刻)、三刻(差一刻四点)、五分钟倍数(三点二十)</p>
+    </div>
+    
+    <script>
+        const clock = document.getElementById('clock');
+        const hourHand = document.getElementById('hour-hand');
+        const minuteHand = document.getElementById('minute-hand');
+        const timeTypeBtns = document.querySelectorAll('.time-type-btn');
+        
+        let currentTimeType = 'all';
+        
+        // 设置时间类型
+        timeTypeBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                timeTypeBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentTimeType = this.dataset.type;
+                setRandomTime();
+            });
+        });
+        
+        function setRandomTime() {
+            let hours, minutes;
+            
+            // 根据选择的时间类型生成不同的时间
+            switch(currentTimeType) {
+                case 'hour': // 整点
+                    hours = Math.floor(Math.random() * 12);
+                    minutes = 0;
+                    break;
+                    
+                case 'half': // 半点
+                    hours = Math.floor(Math.random() * 12);
+                    minutes = 30;
+                    break;
+                    
+                case 'quarter': // 一刻或三刻
+                    hours = Math.floor(Math.random() * 12);
+                    minutes = Math.random() > 0.5 ? 15 : 45;
+                    break;
+                    
+                case 'five': // 五分钟倍数
+                    hours = Math.floor(Math.random() * 12);
+                    minutes = Math.floor(Math.random() * 12) * 5;
+                    break;
+                    
+                default: // 全部类型随机
+                    const types = [
+                        [0, 15, 30, 45], // 整点、一刻、半点、三刻
+                        Array.from({length: 12}, (_, i) => i * 5) // 所有五分钟倍数
+                    ].flat();
+                    hours = Math.floor(Math.random() * 12);
+                    minutes = types[Math.floor(Math.random() * types.length)];
+            }
+            
+            const hourDegrees = (hours * 30) + (minutes * 0.5);
+            const minuteDegrees = minutes * 6;
+            
+            hourHand.style.transform = `rotate(${hourDegrees}deg)`;
+            minuteHand.style.transform = `rotate(${minuteDegrees}deg)`;
+        }
+        
+        // 初始随机时间
+        setRandomTime();
+        
+        // 点击时钟生成新时间
+        clock.addEventListener('click', setRandomTime);
+    </script>
+</body>
+</html>
